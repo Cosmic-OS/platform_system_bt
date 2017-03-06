@@ -1950,6 +1950,63 @@ void btif_a2dp_on_suspended(tBTA_AV_SUSPEND *p_av)
 }
 
 
+#ifdef BTA_AV_SPLIT_A2DP_ENABLED
+/*****************************************************************************
+**
+** Function        btif_media_remote_start_alarm_cb
+**
+** Description     Remote start honor timer, if media is not started then
+**                 suspend AV
+** Returns
+**
+*******************************************************************************/
+static void btif_media_remote_start_alarm_cb(UNUSED_ATTR void *context) {
+  thread_post(worker_thread, btif_a2dp_remote_start_timer, NULL);
+}
+
+/*****************************************************************************
+**
+** Function        btif_a2dp_remote_start_timer
+**
+** Description     Suspend stream if media is not started for remote stream
+**                 start is honored
+** Returns
+**
+*******************************************************************************/
+void btif_a2dp_remote_start_timer()
+{
+    if (alarm_is_scheduled(btif_media_cb.remote_start_alarm))
+    {
+        alarm_free(btif_media_cb.remote_start_alarm);
+        btif_media_cb.remote_start_alarm = NULL;
+        APPL_TRACE_DEBUG("Suspend stream request to Av");
+        btif_dispatch_sm_event(BTIF_AV_SUSPEND_STREAM_REQ_EVT, NULL, 0);
+    }
+}
+
+/*****************************************************************************
+**
+** Function        btif_a2dp_on_remote_started
+**
+** Description
+**
+** Returns
+**
+*******************************************************************************/
+void btif_a2dp_on_remote_started()
+{
+    btif_media_cb.remote_start_alarm = alarm_new("btif.remote_start_task");
+
+    if (!btif_media_cb.remote_start_alarm)
+    {
+        APPL_TRACE_WARNING("%s:unable to allocate media alarm",__func__);
+        return;
+    }
+    alarm_set(btif_media_cb.remote_start_alarm, BTIF_REMOTE_START_TOUT,
+              btif_media_remote_start_alarm_cb, NULL);
+}
+#endif
+>>>>>>> f585f867... A2DP: Fix for compilation error.
 /*****************************************************************************
 **
 ** Function        btif_a2dp_on_offload_started
