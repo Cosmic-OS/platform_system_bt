@@ -2006,7 +2006,6 @@ void btif_a2dp_on_remote_started()
               btif_media_remote_start_alarm_cb, NULL);
 }
 #endif
->>>>>>> f585f867... A2DP: Fix for compilation error.
 /*****************************************************************************
 **
 ** Function        btif_a2dp_on_offload_started
